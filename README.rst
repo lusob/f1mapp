@@ -21,8 +21,7 @@ live timing data from server (every five seconds) and the interface will be
 updated using this data.
 
 The server side (Not in github yet):
-It uses a Django app for the web page and the static race data (circuit, laps,
-        drivers) is put into the html using the django template system.
+It uses a Django app for the web page and the static race data (circuit, laps, driver names) is put into the html using the django template system.
 For the dynamic data (live timing) I have modified the source of a C program
 for the linux terminal called live-f1 to generate a json with the data that the
 client requires instead of printing it on terminal screen.

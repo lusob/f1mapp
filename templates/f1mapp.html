@@ -1,361 +1,407 @@
 <!DOCTYPE html>
 <html>
-<head>
-<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />    
-<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
-<title>F1 live timing map</title>
-
-<!-- jquerymobile files -->
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script> 
-<script src="http://ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js"></script>
-<script src="http://code.jquery.com/mobile/1.1.0-rc.1/jquery.mobile-1.1.0-rc.1.min.js"></script> 
-<link rel="stylesheet" href="http://code.jquery.com/mobile/1.1.0-rc.1/jquery.mobile-1.1.0-rc.1.min.css" /> 
-<link rel="stylesheet" href="/static_f1mapp/css/f1map.css" />
-
-<!-- google maps files -->
-<link href="https://developers.google.com/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
-<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
-<script type="text/javascript" src="http://google-maps-utility-library-v3.googlecode.com/svn/trunk/styledmarker/src/StyledMarker.js"></script>
-
-<!-- counter -->
-<script src="/static_f1mapp/js/jquery.jcountdown1.4.min.js" type="text/javascript"></script>
-
-<!-- Animation cars -->
-<script type="text/javascript">
-var map = undefined;
-var cars = [];
-var drivers = [];
-var info = [];
-var posPit = new google.maps.LatLng(41.570047, 2.260802);
-var posGeneral = new google.maps.LatLng(41.5695965102185, 2.2574226640320116);
-var delay = 1; //milliseconds
-var generalZoom = 16;
-var targetCar = -1;
-var targetZoom = 18;
-
-drivers = ['VET','WEB','BUT','HAM','ALO','MAS','SCH','ROS','RAI','GRO','DIR','HUL','','KOB','PER','RIC','VER','MAL','SEN','KOV','PET','DLR','KAR','GLO','PIC'];
-
-// TODO: Pintar el contenido de race con un template de django
-var race = {country:'Spain', 
-name:'Catalunya', 
-circuit: [[41.568942997596416, 2.256398060188303], [41.56799582081625, 2.257020332679758], [41.56779514598692, 2.2573636554336645], [41.56754630833289, 2.25772843585969], [41.56730549678744, 2.2577606223678686], [41.56638237754826, 2.257004239425669], [41.56614958887512, 2.2567145608520605], [41.565944894693644, 2.256355144844065], [41.56531475363274, 2.2545419715499975], [41.565338835569676, 2.2542361997222997], [41.56545924511967, 2.254059173927317], [41.56561577719922, 2.2539948009109594], [41.56585659504263, 2.2541181825256444], [41.56742991619811, 2.255357363090525], [41.567706848864674, 2.255378820762644], [41.568060036630115, 2.255255439147959], [41.56834098006478, 2.254922845230112], [41.56844131670964, 2.2545473359680273], [41.56831689924682, 2.2541181825256444], [41.56645462213836, 2.252551772460947], [41.56619775211768, 2.252353288993845], [41.56582849967382, 2.252208449707041], [41.56536693115141, 2.252127983436594], [41.565013728663814, 2.252203085289011], [41.564676579033645, 2.252380111083994], [41.56445181163616, 2.252610781059275], [41.5642190160074, 2.253184773788462], [41.56418289247258, 2.2537104867553808], [41.564371537376154, 2.2543220304107763], [41.564732770760834, 2.254922845230112], [41.56490535933168, 2.2555880330658056], [41.56486120881092, 2.2558187030410863], [41.56474882553104, 2.256049373016367], [41.564632428356546, 2.2564409755325414], [41.56470467490333, 2.256746747360239], [41.56500971498807, 2.257004239425669], [41.56627802411031, 2.2580663941955663], [41.57276367141376, 2.2635488294220067], [41.57327334506013, 2.2636829398727514], [41.573546239532675, 2.2635595582580663], [41.5738191328523, 2.2632859729385473], [41.57470602817879, 2.2614137910461523], [41.57474615890107, 2.2612367652511693], [41.574750171971914, 2.2609578155136205], [41.574702015105196, 2.260694959030161], [41.57451741345016, 2.2603891872024633], [41.57429669338748, 2.2599600337600805], [41.574055907004336, 2.259595253334055], [41.57384321161926, 2.2592412017440893], [41.573762949027824, 2.2591070912933446], [41.573522160654996, 2.2588925145721532], [41.57318906859296, 2.2589139722442724], [41.57294426489806, 2.2591875575637914], [41.572892093498915, 2.25971863494874], [41.573004462614, 2.2600887797927953], [41.57318906859296, 2.26046965347291], [41.57314893690328, 2.260845162734995], [41.573004462614, 2.2618268512344457], [41.572984396714915, 2.2618804954147436], [41.572920185796, 2.261891224250803], [41.572743605439896, 2.261869766578684], [41.57265130187981, 2.261671283111582], [41.570761056490866, 2.2568433068847753], [41.570604536877156, 2.2564141534423925], [41.57031958994012, 2.2560922883606054], [41.5700908288135, 2.2559850000000097], [41.56989417386416, 2.2559689067459203], [41.56969350493144, 2.2560171865081884], [41.56893497073449, 2.256446339950571]], 
-startDate:'05/11/2012, 14:00',
-trackSectors: [15, 30, 45], // Map every sector to track circuit
-laps:'56'}
-
-function updateCarsFromServer(){
-    $.ajax({
-      url: "cars_data.json",
-      type: "GET",
-      dataType: "json",
-      crossDomain: true,
-      cache:false
-    }).done(function(data) { 
-        var drivers_data = [];
-        for(var key in data) {
-            var car_position = data[key].car_position;
-            var car_number = data[key].car_number-1;
-            var current_sector = data[key].current_sector-1;
-            var last_time_lap = data[key].last_time_lap;
-            info['lap'] =  car_position == 1 ? parseInt(data[key].car_interval): 0;
-            drivers_data[car_position]= { Name: drivers[car_number], CarNumber:car_number, CarPosition:car_position, LapTime:last_time_lap};
-            updateCar(car_number, car_position, current_sector, last_time_lap, false);
-        }
-        renderDrivers(drivers_data);
-        renderInfo('LAP: ' + info['lap']);
-    });
-}
-
-function updateCarsDemoRace(){
-    var data={"20": {"car_position": "17", "last_time_lap": "1:45.312", "car_number": "24", "current_sector": "1"}, "1": {"car_position": "3", "last_time_lap": "1:42.603", "car_number": "4", "current_sector": "1"}, "9": {"car_position": "2", "last_time_lap": "1:41.784", "car_number": "15", "current_sector": "1"}, "10": {"car_position": "5", "last_time_lap": "1:41.054", "car_number": "9", "current_sector": "1"}, "21": {"car_position": "20", "last_time_lap": "1:48.523", "car_number": "25", "current_sector": "1"}, "2": {"car_position": "14", "last_time_lap": "1:44.216", "car_number": "3", "current_sector": "1"}, "11": {"car_position": "19", "last_time_lap": "RETIRED", "car_number": "18", "current_sector": "1"}, "22": {"car_position": "22", "last_time_lap": "1:46.244", "car_number": "22", "current_sector": "1"}, "3": {"car_position": "10", "last_time_lap": "1:41.903", "car_number": "7", "current_sector": "1"}, "12": {"car_position": "15", "last_time_lap": "1:42.051", "car_number": "6", "current_sector": "1"}, "23": {"car_position": "21", "last_time_lap": "1:48.336", "car_number": "23", "current_sector": "1"}, "4": {"car_position": "4", "last_time_lap": "1:41.640", "car_number": "2", "current_sector": "1"}, "13": {"car_position": "6", "last_time_lap": "1:41.607", "car_number": "19", "current_sector": "1"}, "24": {"car_position": "18", "last_time_lap": "1:45.622", "car_number": "20", "current_sector": "1"}, "5": {"car_position": "11", "last_time_lap": "1:43.108", "car_number": "1", "current_sector": "1"}, "6": {"car_position": "", "last_time_lap": "", "car_number": "10", "current_sector": "1"}, "7": {"car_position": "13", "last_time_lap": "1:42.465", "car_number": "8", "current_sector": "1"}, "8": {"car_position": "1", "last_time_lap": "1:42.118", "car_number": "5", "current_sector": "1"}, "14": {"car_position": "7", "last_time_lap": "1:43.715", "car_number": "11", "current_sector": "1"}, "15": {"car_position": "12", "last_time_lap": "1:43.522", "car_number": "16", "current_sector": "1"}, "16": {"car_position": "9", "last_time_lap": "1:42.219", "car_number": "12", "current_sector": "1"}, "17": {"car_position": "", "last_time_lap": "RETIRED", "car_number": "14", "current_sector": "1"}, "18": {"car_position": "8", "last_time_lap": "1:42.190", "car_number": "17", "current_sector": "1"}, "19": {"car_position": "16", "last_time_lap": "1:43.688", "car_number": "21", "current_sector": "1"}};
-    
-    var drivers_data = [];
-    for(var key in data) {
-        var car_position = data[key].car_position;
-        var car_number = data[key].car_number-1;
-        var current_sector = data[key].current_sector-1;
-        var last_time_lap = data[key].last_time_lap;
-        drivers_data[car_position]= { Name: drivers[car_number], CarNumber:car_number, CarPosition:car_position, LapTime:last_time_lap};
-        updateCar(car_number, car_position, current_sector, last_time_lap, true);
-    }
-    renderDrivers(drivers_data);
-}
-
-function updateCar(car_number, car_position, current_sector, last_time_lap, is_demo) {
-    if(last_time_lap == 'RETIRED' || last_time_lap == 'PIT' || last_time_lap == '')
-    {
-        cars[car_number].setSector('pit');
-    } else {
-        time_data = last_time_lap.split(":")
-        if(time_data.length==2){                    
-            lap_seconds = parseFloat(time_data[0]*60)+parseFloat(time_data[1])+is_demo*parseFloat(car_position);
-            cars[car_number].setLapTime(lap_seconds);
-        }
-        if(is_demo){
-            var startPos = 23-car_position;
-            cars[car_number].posCurrent=race.circuit[startPos];
-            cars[car_number].track=startPos+1;
-        } else {
-            cars[car_number].setSector(current_sector);
-        }
-    }
-}
-
-function renderInfo(info){
-    $("#time").html(info['lap']);
-}
-
-function renderDrivers(drivers_data){
-    $("#driver_list").empty();
-       var markup = "<li><a class='driver' href='#' onclick='targetCar = ${CarNumber}; map.setZoom(targetZoom);'><img src='/static_f1mapp/img/f1_drivers/${Name}.jpg' class='ui-li-thumb'><h3>${CarPosition}. ${Name}</h3><p>${LapTime}</p></a></li>";
-       $.template( "driverTemplate", markup );
-       $.tmpl( "driverTemplate", drivers_data.sort(function(a,b){return a.CarPosition-b.CarPosition}))
-           .appendTo( "#driver_list" );
-    $('#driver_list').listview('refresh');
-    $('.driver').click(function(){$('body').animate({scrollTop:0}, 'slow');});
-}
-
-function initialize() {
-   var useragent = navigator.userAgent;
-   var isMobile = useragent.indexOf('iPhone') != -1 || useragent.indexOf('Android') != -1;
-   if (isMobile || screen.height < 700) {
-       generalZoom = generalZoom-1;
-   }
-   var mapOptions = {
-        zoom: generalZoom,
-        center: posGeneral,
-        mapTypeId: google.maps.MapTypeId.SATELLITE,
-          streetViewControl: false,
-          overviewMapControl: false,
-          mapTypeControl: false,
-        scrollwheel:true,
-        draggable:true,
-        panControl: true,
-          zoomControl: true,
-          scaleControl: true
-    };
-    map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
-
-    if (isMobile)
-    {    
-        map.setOptions({scrollwheel:false,
-            draggable:false,
-            panControl: false,
-              zoomControl: false,
-              scaleControl: false});
-        /*Hack to embed Google Maps on a mobile page and be able to scroll past it,
-        you need to use API v3, disable dragging, and add touch events.
-        Extract from: http://stackoverflow.com/questions/7534888/embed-google-maps-on-page-without-overriding-iphone-scroll-behavior*/
-        var dragFlag = false;
-        var start = 0, end = 0;
-        function thisTouchStart(e){
-            dragFlag = true;
-            start = e.touches[0].pageY; 
-        }
-        function thisTouchEnd(){
-            dragFlag = false;
-        }
-        function thisTouchMove(e){
-            if ( !dragFlag ) return;
-            end = e.touches[0].pageY;
-            window.scrollBy( 0,( start - end ) );
-        }
-        document.getElementById("map_canvas").addEventListener("touchstart", thisTouchStart, true);
-        document.getElementById("map_canvas").addEventListener("touchend", thisTouchEnd, true);
-        document.getElementById("map_canvas").addEventListener("touchmove", thisTouchMove, true);
-    }
-    
-    for(var i=0; i<=24; i++){
-        if(i!=12){
-            cars[i] = new Car(i);
-        }
-    }
-
-    updateCarsDemoRace();
-    
-    timerAnimation = setInterval(function() {
-        for(var i=0; i<=24; i++){
-            if(i!=12){
-                cars[i].move();
-            }
-        }
-    }, delay);
-    //clearInterval( timerAnimation );
-    
-    google.maps.event.addListener(map, 'click', function(me) {
-        //clearInterval( timer );
-        targetCar = -1;
-        map.setZoom(generalZoom);
-        map.setCenter(posGeneral);
-        return true;
-    });
-}
-
-function Car(i){
-    //var image = 'http://img.informer.com/icons/png/32/126/126354.png';
-    var self = this;
-    var startTime;
-    var driver = drivers[i];
-    var styleIcon = new StyledIcon(StyledIconTypes.BUBBLE,{color:"#00ff00",text:driver});
-    this.sector = 0;
-    var lastSector = 0;
-    this.durationLap = 90;
-    var durationTrack = 1000*this.durationLap/race.circuit.length;
-    this.posCurrent = 0;
-    this.track=0;
-    
-    var marker = new StyledMarker({
-        map: map,
-        styleIcon:styleIcon,
+    <head>
+        <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />    
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+        <title>F1 live timing map</title>
+        <meta name="description" content="This is a live timing map application for f1 championship races made using javascript and google maps markers" />
         
-        //icon: image
-    });
-    google.maps.event.addListener(marker, 'click', function(me) {
-        targetCar = i;
-        map.setZoom(targetZoom);
-    });
+        <!-- jquerymobile files -->
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script> 
+        <script src="http://ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js"></script>
+        <script src="http://code.jquery.com/mobile/1.1.0-rc.1/jquery.mobile-1.1.0-rc.1.min.js"></script> 
+        <link rel="stylesheet" href="http://code.jquery.com/mobile/1.1.0-rc.1/jquery.mobile-1.1.0-rc.1.min.css" /> 
+        <link rel="stylesheet" href="/static_f1mapp/css/f1mapp.css" />
+        
+        <!-- google maps files -->
+        <link href="https://developers.google.com/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
+        <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+        <script type="text/javascript" src="http://google-maps-utility-library-v3.googlecode.com/svn/trunk/styledmarker/src/StyledMarker.js"></script>
 
-    this.setSector = function (sector) {
-        if(this.sector != sector){
-            if (this.sector == 'pit'){ // If aready was in pit restart the lap
-                this.sector=sector;
-                trackSector = race.trackSectors[sector];
-                this.transition(race.circuit[trackSector], trackSector+1);
-                marker.styleIcon.set('color', '00ff00');
-                marker.styleIcon.set('text', driver);
-            } else {
-                this.sector=sector;
-            }
-        }
-    }
-    
-    this.setLapTime = function (durationLap) {
-        if(this.durationLap!=durationLap){
-            durationTrack = 1000*durationLap/race.circuit.length;
-            this.durationLap = durationLap;
-        }
-    }
+        <!-- socket.io -->
+        <script src="http://50.16.98.1:3000/socket.io/socket.io.js"></script>
+        
+        <!-- counter -->
+        <script src="/static_f1mapp/js/jquery.jcountdown1.4.min.js" type="text/javascript"></script>
 
-     this.move = function() {
-        var self = this;
-        var timePassed = new Date - this.startTime;
-        var p = timePassed / durationTrack;
-        var progress = p<1 ? p*100: 100;
-        var numDeltas = (100 - progress) || 1;        
-        var deltaLatLong = [(race.circuit[this.track][0] - this.posCurrent[0]) / numDeltas, (race.circuit[this.track][1] - this.posCurrent[1]) / numDeltas];    
-        var newPos = [this.posCurrent[0] + deltaLatLong[0], this.posCurrent[1] + deltaLatLong[1]];
-        var latlng = new google.maps.LatLng(newPos[0], newPos[1]);
-        if (this.sector == 'pit'){ // If is pit stop the lap and go to pit position
-            marker.setPosition(posPit);
-            marker.styleIcon.set('color', 'ff0000');
-            marker.styleIcon.set('text', driver+' [PIT]');
-            if(i == targetCar){
-                map.setCenter(posPit);
-            }
-            return;
-        }
-        marker.setPosition(latlng);
-        if(i == targetCar){
-            map.setCenter(latlng);
-        }
-        this.posCurrent = newPos;
-        if (progress==100) {
-            this.startTime = new Date;        
-            if(lastSector != this.sector){
-                this.posCurrent = race.circuit[race.trackSectors[this.sector]];
-                lastSector=this.sector;
-                this.track = race.trackSectors[this.sector]+1;
-            } else {
-                if (this.track < race.circuit.length-1) {
-                    this.track = this.track + 1;
-                } else {
-                    this.track = 1;
+        <!-- Animation cars -->
+        <script type="text/javascript">
+            var map = undefined;
+            var cars = [];
+            var lap = 0;
+            //(49.335805661756574, 8.573241233825684)
+            var posPit = new google.maps.LatLng(50.4441096120201,5.96552032667546);
+            var posGeneral = new google.maps.LatLng(50.437222, 5.971389);
+            var delay = 1; //milliseconds
+            var generalZoom = 15;
+            var targetCar = -1;
+            var targetZoom = 18;
+            var drivers = ['VET','WEB','BUT','HAM','ALO','MAS','SCH','ROS','RAI','GRO','DIR','HUL','','KOB','PER','RIC','VER','MAL','SEN','KOV','PET','DLR','KAR','GLO','PIC'];
+            var socket;
+            
+            // TODO: Pintar el contenido de race con un template de django
+            var dateStartUTC = new Date(Date.UTC(2012,8,2,12,01));
+            var dateEndUTC = new Date(Date.UTC(2012,8,2,14,30));
+            var race = {country:'BELGIUM', 
+                        name:'Spa-Francorchamps',
+                        type:'Race',
+                        circuit: [[50.4440822822069,5.965123359741256],[50.445004654672154,5.964329425872847],[50.445940673535574,5.963481847824141],[50.44613880654112,5.9633531017914265],[50.446241288804686,5.9635033054962605],[50.44548291479873,5.965885107101485],[50.44486800803396,5.967236940444991],[50.44254495481516,5.970380489410445],[50.442114494196524,5.971378271163985],[50.44147904517531,5.971925441803023],[50.44085725346596,5.9720434589996785],[50.43834950509674,5.974478904785201],[50.431918949193715,5.977375690521285],[50.4314200491536,5.9775366230621785],[50.4310920024268,5.97724694448857],[50.43085963462013,5.97675341802983],[50.43048374310657,5.976624671997115],[50.429656771272406,5.977032367767379],[50.429287704800814,5.976807062210128],[50.427695218336666,5.973127071441695],[50.4277840709235,5.972376052917525],[50.4281121405691,5.972182933868453],[50.42848121620354,5.97249407011418],[50.429246697237524,5.97425359922795],[50.42957475674954,5.974285785736129],[50.430975818666,5.973577682556197],[50.43345662172442,5.972837392868087],[50.433989669877626,5.972386781753585],[50.434174185147704,5.971775238098189],[50.434194686800005,5.970326845230147],[50.4339281646278,5.969425623001143],[50.43344978773479,5.968824808181807],[50.430593093672854,5.96701163488774],[50.43037439228775,5.9664751930847615],[50.43040856444576,5.965810005249068],[50.43071611275804,5.964812223495528],[50.430490577524374,5.963943187774703],[50.428932304738936,5.962366048873946],[50.42877510770687,5.961969081939742],[50.42882295033711,5.961389724792525],[50.42962259857179,5.95978039938359],[50.43029921345331,5.959576551498458],[50.43107833376385,5.96002716261296],[50.43193945182265,5.960853282989547],[50.43309441891364,5.962870304168746],[50.433976002051246,5.965681259216353],[50.43499424431387,5.967043821395919],[50.43652498341694,5.968084518493697],[50.43733133500363,5.967902128280684],[50.43939498582497,5.9666253967895955],[50.44130822409094,5.966421548904464],[50.44153370779211,5.96650737959294],[50.44153370779211,5.96676487165837],[50.44149954366403,5.967172567428634],[50.44173185924875,5.96726912695317],[50.442592783531104,5.9664751930847615]], 
+                        startDate: dateStartUTC.toString(),
+                        endDate: dateEndUTC.toString(),
+                        trackSectors: [12, 40, 0], // Map every sector to track circuit
+                        laps:'44'};            
+            
+            function updateUI(data){
+                var drivers_data = [];
+                for(var key in data) {
+                    var car_position = data[key].car_position ;
+                    var car_number = data[key].car_number-1;
+                    var current_sector = data[key].current_sector-1;
+                    var pit =  car_position == "" ? 'IN' : data[key].pit;
+                    var last_time_lap = data[key].last_time_lap;
+                    last_time_lap = last_time_lap!=undefined?last_time_lap:'1:44:00';
+                    last_time_lap = pit=='IN' ? 'IN PIT': last_time_lap;
+                    lap =  car_position == 1 ? parseInt(data[key].car_interval): 0;
+                    var car_gap =  (car_position==1) ? 'Lap: ' + lap: 'Gap: ' + data[key].car_interval;
+                    drivers_data[car_position]= { Name: drivers[car_number], CarNumber:car_number, CarPosition:car_position, LapTime:last_time_lap, Interval:car_gap, CurrentSector: current_sector, Pit:pit};
                 }
+                updateCars(drivers_data);
+                renderDrivers(drivers_data);
             }
-        }
-    }
-}
-</script>
 
-<script type="text/javascript">
-    $(document).ready(function() {
-        var timerRequest;
-        $("#time").countdown({
-            "date" : "04/13/2012, 14:00", // Race start  date
-            "onComplete" : function(event) {
-                if($('#status h3').html()=='DEMO Race'){
-                             $('#status h3').html('LIVE Race');
-                    $('#countdown #info h3').html('Current Race:');
-                    timerRequest = setInterval(function() {
-                        updateCarsFromServer();
-                    }, 5000);
-                    $("#time").countdown({
-                        "date" : "04/13/2012, 16:00", // Race finish  date (requestTimer life)
-                        "direction": "up",
-                        "onChange" : function(event) {
-                            if(info['lap']==race.laps)
-                            {
-                                clearInterval( timerRequest );
-                                $("#time").countdown("complete");
-                            }
+            function updateCarsFromServer(){
+                socket = io.connect('50.16.98.1',{
+                    port: 3000 
+                });
+                socket.on('cars_data', function (data) {
+                    updateUI(data);
+                });
+            }
+            
+            function updateCarsDemoRace(){
+                var data={"20": {"car_position": "17", "last_time_lap": "1:45.312", "car_number": "24", "current_sector": "1"}, "1": {"car_position": "3", "last_time_lap": "1:42.603", "car_number": "4", "current_sector": "1"}, "9": {"car_position": "2", "last_time_lap": "1:41.784", "car_number": "15", "current_sector": "1"}, "10": {"car_position": "5", "last_time_lap": "1:41.054", "car_number": "9", "current_sector": "1"}, "21": {"car_position": "20", "last_time_lap": "1:48.523", "car_number": "25", "current_sector": "1"}, "2": {"car_position": "14", "last_time_lap": "1:44.216", "car_number": "3", "current_sector": "1"}, "11": {"car_position": "19", "last_time_lap": "RETIRED", "car_number": "18", "current_sector": "1"}, "22": {"car_position": "22", "last_time_lap": "1:46.244", "car_number": "22", "current_sector": "1"}, "3": {"car_position": "10", "last_time_lap": "1:41.903", "car_number": "7", "current_sector": "1"}, "12": {"car_position": "15", "last_time_lap": "1:42.051", "car_number": "6", "current_sector": "1"}, "23": {"car_position": "21", "last_time_lap": "1:48.336", "car_number": "23", "current_sector": "1"}, "4": {"car_position": "4", "last_time_lap": "1:41.640", "car_number": "2", "current_sector": "1"}, "13": {"car_position": "6", "last_time_lap": "1:41.607", "car_number": "19", "current_sector": "1"}, "24": {"car_position": "18", "last_time_lap": "1:45.622", "car_number": "20", "current_sector": "1"}, "5": {"car_position": "11", "last_time_lap": "1:43.108", "car_number": "1", "current_sector": "1"}, "6": {"car_position": "21", "last_time_lap": "", "car_number": "10", "current_sector": "1"}, "7": {"car_position": "13", "last_time_lap": "1:42.465", "car_number": "8", "current_sector": "1"}, "8": {"car_position": "1", "last_time_lap": "1:16.118", "car_number": "5", "current_sector": "1"}, "14": {"car_position": "7", "last_time_lap": "1:43.715", "car_number": "11", "current_sector": "1"}, "15": {"car_position": "12", "last_time_lap": "1:43.522", "car_number": "16", "current_sector": "1"}, "16": {"car_position": "9", "last_time_lap": "1:42.219", "car_number": "12", "current_sector": "1"}, "17": {"car_position": "", "last_time_lap": "RETIRED", "car_number": "14", "current_sector": "1"}, "18": {"car_position": "8", "last_time_lap": "1:42.190", "car_number": "17", "current_sector": "1"}, "19": {"car_position": "16", "last_time_lap": "1:43.688", "car_number": "21", "current_sector": "1"}};
+                
+                var drivers_data = [];
+                for(var key in data) {
+                    var car_position = data[key].car_position;
+                    var car_number = data[key].car_number-1;
+                    var current_sector = data[key].current_sector-1;
+                    var last_time_lap = data[key].last_time_lap;
+                    var car_gap = data[key].car_interval;
+                    drivers_data[car_position]= { Name: drivers[car_number], CarNumber:car_number, CarPosition:car_position, LapTime:last_time_lap, Interval:car_gap};
+                    updateCar(car_number, car_position, current_sector, last_time_lap, false, true);
+                }
+                renderDrivers(drivers_data);
+            }
+            
+            function updateCar(car_number, car_position, current_sector, last_time_lap, pit, is_demo) {
+                car = cars[car_number];
+                if(last_time_lap == 'RETIRED' || last_time_lap == 'OUT' || last_time_lap == '' || pit =='IN' )
+                {
+                    car.setSector('pit');
+                } else {
+                    if (last_time_lap == '')
+                        last_time_lap = "1:44.000";
+                    time_data = last_time_lap.split(":")
+                        if(time_data.length==2){                    
+                            lap_seconds = parseFloat(time_data[0]*60)+parseFloat(time_data[1])+is_demo*parseFloat(car_position);
+                            car.setLapTime(lap_seconds);
                         }
-                    });
-                } else {
-                    $('#status h3').html('DEMO Race');
-                    $('#countdown #info h3').html('Race:');
-                    clearInterval( timerRequest ); // Stop request timer
-                    /*
-                    $("#time").countdown({
-                        "date" : "04/13/2012, 14:00" // Next race start date
-                    });
-                    */
+                    if(is_demo){
+                        var startPos = 23-car_position;
+                        car.posCurrent=race.circuit[startPos];
+                        car.track=startPos+1;
+                    } else {
+                        car.setSector(current_sector);
+                    }
                 }
             }
-        });
-    });
-</script>
-    <script type="text/javascript">
+            
+            function renderDrivers(drivers_data){
+                if(drivers_data.length==0){
+                    $("#driver_list").html("<h3 style='padding-left: 13px;'>Waiting for lap times...</h3>");
+                } else {
+                    $("#driver_list").empty();
+                    var markup = "<li><a class='driver' onclick='followCar(${CarNumber});'><img src='/static_f1mapp/img/f1_drivers/${Name}.jpg' class='ui-li-thumb'><h3>${CarPosition}. ${Name}</h3><p>Lap Time: ${LapTime}</p><p>${Interval}</p></a></li>";
+                    $.template( "driverTemplate", markup );
+                    $.tmpl( "driverTemplate", drivers_data.sort(function(a,b){return a.CarPosition-b.CarPosition}))
+                        .appendTo( "#driver_list" );
+                    $('#driver_list').listview('refresh');
+                    $('.driver').click(function(){$('body').animate({scrollTop:0}, 'slow');});
+                }
+            }
+            function updateCars(drivers_data){
+                var cars_info = drivers_data.sort(function(a,b){return a.CarPosition-b.CarPosition});
+                for (car in cars_info) {
+                    updateCar(cars_info[car].CarNumber, cars_info[car].CarPosition, cars_info[car].CurrentSector, cars_info[car].LapTime, cars_info[car].Pit, false);
+                }
+            }
+            
+            function renderCircuit() {
+                var polyOptions = {
+                    strokeColor: '#0000ff',
+                    strokeOpacity: 0.3,
+                    strokeWeight: 5
+                }
+                var poly = new google.maps.Polyline(polyOptions);
+                poly.setMap(map);
+                var path = poly.getPath();
+                var latLong;
+                for (i in race.circuit) {
+                    latLong = new google.maps.LatLng(race.circuit[i][0], race.circuit[i][1]);
+                    path.push(latLong);
+                }
+                path.push(new google.maps.LatLng(race.circuit[0][0], race.circuit[0][1]));
+            }
+            
+            function resizeMap(){
+                $('#map_canvas').height($(window).height()-115);
+            }
+            
+            function initialize() {
+                var useragent = navigator.userAgent;
+                var isMobile = useragent.indexOf('iPhone') != -1 || useragent.indexOf('Android') != -1;
+                if (isMobile || screen.height < 700) {
+                    generalZoom = generalZoom-1;
+                }
+                var mapOptions = {
+                    zoom: generalZoom,
+                    center: posGeneral,
+                    mapTypeId: google.maps.MapTypeId.SATELLITE,
+                    streetViewControl: false,
+                    overviewMapControl: false,
+                    mapTypeControl: false,
+                    scrollwheel:true,
+                    draggable:true,
+                    panControl: true,
+                    zoomControl: true,
+                    scaleControl: true
+                };
+                map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
+                
+                if (isMobile)
+                {    
+                    map.setOptions({scrollwheel:false,
+                                    draggable:false,
+                                    panControl: false,
+                                    zoomControl: false,
+                                    scaleControl: false});
+                    /*Hack to embed Google Maps on a mobile page and be able to scroll past it,
+                    you need to use API v3, disable dragging, and add touch events.
+                    Extract from: http://stackoverflow.com/questions/7534888/embed-google-maps-on-page-without-overriding-iphone-scroll-behavior*/
+                    var dragFlag = false;
+                    var start = 0, end = 0;
+                    function thisTouchStart(e){
+                        dragFlag = true;
+                        start = e.touches[0].pageY; 
+                    }
+                    function thisTouchEnd(){
+                        dragFlag = false;
+                    }
+                    function thisTouchMove(e){
+                        if ( !dragFlag ) return;
+                            end = e.touches[0].pageY;
+                        window.scrollBy( 0,( start - end ) );
+                    }
+                    document.getElementById("map_canvas").addEventListener("touchstart", thisTouchStart, true);
+                    document.getElementById("map_canvas").addEventListener("touchend", thisTouchEnd, true);
+                    document.getElementById("map_canvas").addEventListener("touchmove", thisTouchMove, true);
+                }
+                renderCircuit();
+                for(var i=0; i<=24; i++){
+                    if(i!=12){
+                        cars[i] = new Car(i);
+                    }
+                }
+                
+                updateCarsDemoRace();
+                
+                timerAnimation = setInterval(function() {
+                    for(var i=0; i<=24; i++){
+                        if(i!=12){
+                            cars[i].move();
+                        }
+                    }
+                }, delay);
+                //clearInterval( timerAnimation );
+                
+                google.maps.event.addListener(map, 'click', function(me) {
+                    //clearInterval( timer );
+                    unFollowCar();
+                    return true;
+                });
+            }
+            function followCar(i){
+                if( targetCar == i && targetCar != -1) {
+                    unFollowCar();
+                } else {
+                    targetCar = i;
+                    map.setZoom(targetZoom);
+                    for(var j=0; j<=24; j++){
+                        if(j!=12){
+                            cars[j].marker.setZIndex(0);
+                            cars[j].marker.styleIcon.set('color', '#00ff00');
+                        }
+                    }
+                    cars[i].marker.setZIndex(google.maps.Marker.MAX_ZINDEX + 1);
+                    cars[i].marker.styleIcon.set('color', '#ffff00');
+                }
+            }
+            function unFollowCar()
+            {
+                targetCar = -1;
+                map.setZoom(generalZoom);
+                map.setCenter(posGeneral);
+            }
+            
+            function Car(i){
+                var self = this;
+                var startTime;
+                var driver = drivers[i];
+                var styleIcon = new StyledIcon(StyledIconTypes.BUBBLE,{color:"#00ff00",text:driver});
+                this.sector = 0;
+                this.lastSector = 0;
+                this.durationLap = 90;
+                var durationTrack = 1000*this.durationLap/race.circuit.length;
+                this.posCurrent = 0;
+                this.track=0;
+                
+                this.marker = new StyledMarker({
+                    map: map,
+                    styleIcon:styleIcon,                    
+                });
+                google.maps.event.addListener(this.marker, 'click', function(me) {
+                    followCar(i);
+                });
+                
+                this.setSector = function (sector) {
+                    if(this.sector != sector){
+                        if (this.sector == 'pit'){ // If aready was in pit restart the lap
+                            this.sector=sector;
+                            trackSector = race.trackSectors[sector];
+                            this.marker.styleIcon.set('color', '00ff00');
+                            this.marker.styleIcon.set('text', driver);
+                        } else {
+                            this.sector=sector;
+                        }
+                    }
+                }
+                    this.setLapTime = function (durationLap) {
+                        if(this.durationLap!=durationLap){
+                            durationTrack = 1000*durationLap/race.circuit.length;
+                            this.durationLap = durationLap;
+                        }
+                    }
+                        
+                        this.move = function() {
+                            var self = this;
+                            var timePassed = new Date - this.startTime;
+                            var p = timePassed / durationTrack;
+                            var progress = p<1 ? p*100: 100;
+                            var numDeltas = (100 - progress) || 1;        
+                            var deltaLatLong = [(race.circuit[this.track][0] - this.posCurrent[0]) / numDeltas, (race.circuit[this.track][1] - this.posCurrent[1]) / numDeltas];    
+                            var newPos = [this.posCurrent[0] + deltaLatLong[0], this.posCurrent[1] + deltaLatLong[1]];
+                            var latlng = new google.maps.LatLng(newPos[0], newPos[1]);
+                            if (this.sector == 'pit'){ // If is pit stop the lap and go to pit position
+                                this.marker.setPosition(posPit);
+                                this.marker.styleIcon.set('color', 'ff0000');
+                                this.marker.styleIcon.set('text', driver+' [PIT]');
+                                if(i == targetCar){
+                                    map.setCenter(posPit);
+                                }
+                                return;
+                                    }
+                            this.marker.setPosition(latlng);
+                            if(i == targetCar){
+                                map.setCenter(latlng);
+                            }
+                            this.posCurrent = newPos;
+                            if (progress==100) {
+                                this.startTime = new Date;        
+                                if(this.lastSector != this.sector){
+                                    this.posCurrent = race.circuit[race.trackSectors[this.sector]];
+                                    this.lastSector=this.sector;
+                                    this.track = race.trackSectors[this.sector]+1;
+                                } else {
+                                    if (this.track < race.circuit.length-1) {
+                                        this.track = this.track + 1;
+                                    } else {
+                                        this.track = 1;
+                                    }
+                                }
+                            }
+                        };
+                
+            }
+        </script>
         
-        var _gaq = _gaq || [];
-        _gaq.push(['_setAccount', 'UA-28599500-1']);
-        _gaq.push(['_trackPageview']);
-        
-        (function() {
-            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-        })();
-        
-    </script>
-</head>
-<body onload="initialize(0)">
-    <div data-role="page" class="type-interior" data-theme="a" data-content-theme="a"> 
-        <div data-role="header">
-            <a href="http://lusob.com" data-icon="home" rel="external" data-iconpos="notext" data-direction="reverse">Home</a> 
-            <a href="info"  data-rel="dialog" data-overlay-theme ="c" data-icon="info">info</a>
-            <h1>F1 live timing map</h1> 
-        </div><!-- /header -->
-        <div data-role="header" id="counter-header"> 
-            <div  id="status"><h3>DEMO Race</h3></div>
-            <div id="countdown">
-                <div  id="info"><h3>Next Race: </h3></div>
-                <div  id="country"><h3>CHINA</h3></div>
-                <div  id="circuit"><h3>Shanghai</h3></div>
-                <h3 id="time" class="time"></h3>
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $("#time").countdown({
+                    "date" : race.startDate, // Race start  date
+                    "onComplete" : function(event) {
+                        if($('#status h3').html()=='DEMO Race'){
+                            $('#status h3').html('LIVE Race');
+                            $('#countdown #info h3').html('Current Race:');
+                            updateCarsFromServer();
+                            $("#time").countdown({
+                                "date" : race.endDate, // Race finish  date
+                            });
+                        } else {
+                            $('#status h3').html('DEMO Race');
+                            $('#countdown #info h3').html('Race:');
+                        }
+                    }
+                });
+                resizeMap();
+                $(window).bind('resize', resizeMap);
+                //$.mobile.changePage('error', {transition: 'pop', role: 'dialog'});
+            });
+        </script>
+        <script type="text/javascript">
+            
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-28599500-1']);
+            _gaq.push(['_trackPageview']);
+            
+            (function() {
+                var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+                ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+            })();
+            
+        </script>
+    </head>
+    <body onload="initialize(0)">
+        <div data-role="page" class="type-interior" data-theme="a" data-content-theme="a"> 
+            <div data-role="header">
+                <a href="http://lusob.com/2012/04/f1-live-timing-map/" data-icon="home" rel="external" data-iconpos="notext" data-direction="reverse">Home</a> 
+                <a href="info"  data-rel="dialog" data-overlay-theme ="c" data-icon="info">info</a>
+                <h1>F1 live timing map <a target="_blank" href="https://twitter.com/lusob">@lusob</a></h1> 
+            </div><!-- /header -->
+            <div data-role="header" id="counter-header"> 
+                <div  id="status"><h3>DEMO Race</h3></div>
+                <div id="countdown">
+                    <div  id="info"><h3>Next Race: </h3></div>
+                    <div  id="country"><h3>BELGIUM</h3></div>
+                    <div  id="circuit"><h3>Spa-Francorchamps</h3></div>
+                    <div  id="type"><h3></h3></div>
+                    <h3 id="time" class="time"></h3>
+                </div>
+            </div><!-- /header -->
+            
+            <div data-role="content" data-theme="a" data-content-theme="a"> 
+                <div class="content-primary"> 
+                    <div id="map_canvas"></div>
+                </div>        
+                <div class="content-secondary">           
+                    <ul data-role="listview" id="driver_list">
+                        <li><h3>Giving data...</h3></li>
+                    </ul> 
+                </div>
             </div>
-        </div><!-- /header -->
-
-        <div data-role="content" data-theme="a" data-content-theme="a"> 
-            <div class="content-primary"> 
-                <div id="map_canvas"></div>
-            </div>        
-            <div class="content-secondary">           
-                <ul data-role="listview" id="driver_list">
-                    <li><h3>Giving data...</h3></li>
-                </ul> 
-            </div>
-        </div>
-    </div>   
-</body>
+        </div>   
+    </body>
 </html>
+

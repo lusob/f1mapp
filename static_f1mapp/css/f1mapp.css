@@ -1,0 +1,129 @@
+/* countdown */
+#countdown{ float:right; margin-right: 10px;}
+#info{ float:left; margin-right: 5px;height:20px} 
+#country{ float:left; margin-right: 2px; color:lightSkyBlue;height:20px}
+#circuit{ float:left; margin-right: 20px; color:lightgray;height:20px} 
+#type{ float:left; margin-right: 20px; color:yellow;height:20px} 
+#time{ float:left; margin-right: 20px; color: greenYellow;height:20px} 
+#status{ float:left; color:red; height:20px} 
+#counter-header{ padding-left:13px;} 
+
+/* Hack to fix google maps controls style bug */
+#map_canvas img {max-width: none;}
+
+/* docs site layout */
+
+@media all and (min-width: 750px){
+    
+    /* Hack to hide scrollbar when the menu list is on the left */
+    body {
+        overflow-y:hidden;
+    }
+    .ui-page, .ui-content {height: 100%;}
+    
+    .type-home .ui-content {
+        margin-top: 5px;
+    }
+    .ui-mobile #jqm-homeheader {
+        max-width: 340px;
+    }
+    .ui-mobile .jqm-themeswitcher {
+        float: right;
+    }
+    p.intro {
+        margin: 2em 0;
+    }
+    .type-home .ui-content,
+    .type-interior .ui-content {
+        padding: 0;
+        background: url(../images/px-ccc.gif) 50% 0 repeat-y;
+    }
+    .type-interior .ui-content {
+        background-position: 30%;
+        overflow: hidden;
+    }
+    .content-secondary {
+        text-align: left;
+        float: left;
+        width: 30%;
+        background: none;
+        /* Hack to show scrollbar when the menu list is on the left */
+        position:fixed; 
+        overflow-x:hidden; 
+        overflow-y:auto; 
+        top:100px;
+        bottom:0px;
+    }
+    .content-secondary,
+    .type-interior .content-secondary {
+        margin: 30px 0 20px 2%;
+        padding: 20px 4% 0 0;
+            background: none;
+                    border-top: none;
+    }
+    .type-index .content-secondary {
+        padding: 0;
+    }
+    .content-secondary .ui-collapsible {
+        margin: 0;
+        padding: 0;
+    }
+    .content-secondary .ui-collapsible-content {
+        border: none;
+    }
+    .type-index .content-secondary .ui-listview {
+        margin: 0;
+    }
+
+    .ui-mobile #jqm-homeheader {
+        padding: 0;
+    }
+    .content-primary {
+        width: 69%;
+        float: right;
+        margin-top: 30px;
+        margin-right: 1%;
+        padding-right: 1%;
+    }
+    .content-primary ul:first-child {
+        margin-top: 0;
+    }
+    .content-secondary h2 {
+        position: absolute;
+        left: -9999px;
+    }
+    .type-interior .content-primary {
+        padding: 1.5em 6% 3em 0;
+        margin: 0;
+    }
+    /* fix up the collapsibles - expanded on desktop */
+    .content-secondary .ui-collapsible-heading {
+        display: none;
+    }
+    .content-secondary .ui-collapsible-contain {
+        margin:0;
+    }
+    .content-secondary .ui-collapsible-content {
+        display: block;
+        margin: 0;
+        padding: 0;
+    }
+    .type-interior  .content-secondary .ui-li-divider {
+        padding-top: 1em;
+        padding-bottom: 1em;
+    }
+    .type-interior .content-secondary {
+        margin: 0;
+        padding: 0;
+    }
+    
+}
+
+@media all and (max-width: 750px){
+    /*Android scroll hack*/
+    .content-primary {padding:5px !important; min-height: 200px !important;}
+    body {overflow-y:auto;}
+}
+.ui-content .ui-listview {margin:0 !important; overflow-y:auto !important;}
+.content-primary {padding:5px !important; height: 95%;}
+.ui-li-has-thumb .ui-btn-inner a.ui-link-inherit{padding-left:140px}

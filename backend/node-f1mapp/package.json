@@ -1,0 +1,9 @@
+{
+  "name": "f1mapp-cars-data-server",
+  "version": "0.0.1",
+  "description": "This app server f1 cars data timming using socket.io app",
+  "dependencies": {
+    "express": "~4.3.1",
+    "socket.io": "~1.0.2"
+  }
+}

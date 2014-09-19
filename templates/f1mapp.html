@@ -16,11 +16,14 @@
         
         <!-- google maps files -->
         <link href="https://developers.google.com/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
+        <!--
         <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
-        <script type="text/javascript" src="http://google-maps-utility-library-v3.googlecode.com/svn-history/r165/trunk/styledmarker/src/StyledMarker.js"></script>
-        
+        -->
+        <!--<script type="text/javascript" src="http://google-maps-utility-library-v3.googlecode.com/svn-history/r165/trunk/styledmarker/src/StyledMarker.js"></script>-->
+        <script type="text/javascript" src="/static_f1mapp/js/StyledMarker.js"></script>
         <!-- socket.io -->
-        <script src="http://64.120.230.50:3000/socket.io/socket.io.js"></script>
+        <script src="https://cdn.socket.io/socket.io-1.1.0.js"></script>
         
         <!-- counter -->
         <script src="/static_f1mapp/js/jquery.jcountdown1.4.min.js" type="text/javascript"></script>
@@ -30,8 +33,8 @@
             var map = undefined;
             var cars = [];
             var lap = 0;
-            var posPit = new google.maps.LatLng(28.35069430931224,77.53529459238052);
-            var posGeneral = new google.maps.LatLng(28.350544923834753, 77.53491640090942);
+            var posPit = new google.maps.LatLng(1.2911275910441806,103.86391997337341);
+            var posGeneral = new google.maps.LatLng(1.2913421132775513, 103.85830879211426);
             var circuitLineStyle = {
                 strokeColor: '#0000ff',
                 strokeOpacity: 0.3,
@@ -39,27 +42,27 @@
             };
             var circuit_line = new google.maps.Polyline(circuitLineStyle);
             var delay = 1; //milliseconds
-            var generalZoom = 15;
+            var generalZoom = 17;
             var targetCar = -1;
             var targetZoom = 18;
-            var drivers = ['VET','WEB','ALO','MAS','BUT','PER','RAI','GRO','ROS','HAM','HUL','GUT','','DIR','SUT','MAL','BOT','VER','RIC','PIC','VDG','BIA','CHI'];
+            var drivers = {'9':'ERI','10':'KOB','1':'VET','3':'RIC','4':'CHI','6':'ROS','7':'RAI','8':'GROS','11':'PER','13':'MAL','14':'ALO','44':'HAM','20':'MAG','22':'BUT','27':'HUL','21':'GUT','25':'VER','26':'KVY','99':'SUT','19':'MAS','17':'BIA','77':'BOT'};
             var socket;
-            var default_time_lap = '1:30:00';            
-            var dateStartUTC = new Date(Date.UTC(2014,9,27,9,30));
-            var dateEndUTC = new Date(Date.UTC(2014,9,27,11,30));
-            var race = {country:'INDIA ', 
-                        name:'New Delhi',
-                        type:'',
-                        circuit: [[28.351105035214882,77.53476351499557],[28.353833725606613,77.5335618853569],[28.35409809326777,77.53367990255356],[28.35420195181169,77.53442019224167],[28.354664593182136,77.53505319356918],[28.355306622764214,77.53535360097885],[28.35646793111549,77.53562182188034],[28.356571787341064,77.5357934832573],[28.356335750317815,77.53596514463425],[28.35557098675771,77.53616899251938],[28.35401311801996,77.53665179014206],[28.35111447717108,77.53757447004318],[28.34584573515804,77.53925889730453],[28.34545859505959,77.53907650709152],[28.34561911673508,77.5384971499443],[28.346450048588544,77.53689855337143],[28.347753087722,77.5342807173729],[28.34770587643833,77.53392666578293],[28.34709212784076,77.53319710493088],[28.346582241693113,77.53343313932419],[28.34508089604261,77.53325074911118],[28.344731523256076,77.53263384103775],[28.343404840453704,77.53253191709518],[28.342366144841044,77.53253191709518],[28.341875121561184,77.53218322992325],[28.341761808174272,77.53148585557938],[28.34226227472113,77.5307509303093],[28.343060183490046,77.53050953149796],[28.343910020557562,77.53144830465317],[28.345373612901223,77.53247827291489],[28.345930716945325,77.53237634897232],[28.346487818067132,77.53181844949722],[28.34882949929835,77.5320652127266],[28.34909387941919,77.53239780664444],[28.3490561108708,77.53286987543106],[28.34853207087565,77.53380864858627],[28.34759729040961,77.53562718629837],[28.347871115842693,77.5360295176506],[28.34915053221658,77.5355252623558]], 
+            var default_time_lap = '1:45:00';            
+            var dateStartUTC = new Date(Date.UTC(2014,8,20,10,00));
+            var dateEndUTC = new Date(Date.UTC(2014,8,20,12,00));
+            var race = {country:'Singapore',
+                        name:'Marina Bay Street Circuit',
+                        type:'Race',
+                        circuit: [[1.2913421132775513,103.86423110961914],[1.292779411773939,103.86410236358643],[1.2942381616547303,103.86390924453735],[1.294399053134345,103.86374831199646],[1.2943346965437101,103.86331915855408],[1.2947851926437397,103.86285781860352],[1.2948495492229244,103.86254668235779],[1.294463409723313,103.86250376701355],[1.2937447610536112,103.86257886886597],[1.2930046599720468,103.86275053024292],[1.2920607626273957,103.86300802230835],[1.2915030049406968,103.86302947998047],[1.2912455782747712,103.86260032653809],[1.291406469944023,103.86123776435852],[1.2915459093824753,103.85947823524475],[1.2916960749230264,103.85836243629456],[1.2924469024926182,103.85715007781982],[1.2931762776333633,103.85595917701721],[1.2930153860762195,103.8557767868042],[1.2914922788301249,103.85497212409973],[1.291513731051205,103.85483264923096],[1.2926292462974445,103.85377049446106],[1.2926185201916434,103.85339498519897],[1.2914815527195276,103.85272979736328],[1.2893470558088207,103.85153889656067],[1.2889823677153296,103.85159254074097],[1.288606953446905,103.85220408439636],[1.2879955643770056,103.8524079322815],[1.2875665193280956,103.85271906852722],[1.2868907732296373,103.85349154472351],[1.286504632521555,103.85387778282166],[1.2868156903187558,103.85404944419861],[1.2892076162498383,103.85446786880493],[1.2909452471315845,103.85477900505066],[1.2912563043863734,103.8551652431488],[1.28988336173375,103.85679602622986],[1.2897761005578046,103.85769724845886],[1.2895723043110403,103.85776162147522],[1.2889716415941475,103.85769724845886],[1.2888965587445744,103.85794401168823],[1.288832202014606,103.85980010032654],[1.2895723043110403,103.86007905006409],[1.28948649536017,103.86122703552246],[1.2890359983206046,103.8612699508667],[1.2888214758928003,103.86174201965332],[1.2887249407943744,103.86398434638977],[1.28948649536017,103.86447787284851]],
                         startDate: dateStartUTC.toString(),
                         endDate: dateEndUTC.toString(),
-                        trackSectors: [15, 29, 0], // Map every sector to track circuit
-                        laps:'60'};   
+                        trackSectors: [17, 33, 0], // Map every sector to track circuit
+                        laps:'61'};
             function updateUI(data){
                 var drivers_data = [];
                 for(var key in data) {
                     var car_position = data[key].car_position ;
-                    var car_number = data[key].car_number-1;
+                    var car_number = data[key].car_number;
                     var current_sector = data[key].current_sector-1;
                     var pit =  car_position == "" ? 'IN' : data[key].pit;
                     var last_time_lap = data[key].last_time_lap;
@@ -72,23 +75,40 @@
                 updateCars(drivers_data);
                 renderDrivers(drivers_data);
             }
-            
             function updateCarsFromServer(){
-                socket = io.connect('64.120.230.50',{
-                    port: 3000 
-                });
+                socket = io.connect('50.16.117.65:3000');
                 socket.on('cars_data', function (data) {
-                    updateUI(data);
+                    updateUI( $.parseJSON(data));
                 });
             }
-            
             function updateCarsDemoRace(){
-                var data={"1": {"car_position": "3", "last_time_lap": "1:42.603", "car_number": "4", "current_sector": "1"}, "9": {"car_position": "2", "last_time_lap": "1:41.784", "car_number": "15", "current_sector": "1"}, "10": {"car_position": "5", "last_time_lap": "1:41.054", "car_number": "9", "current_sector": "1"}, "2": {"car_position": "14", "last_time_lap": "1:44.216", "car_number": "3", "current_sector": "1"}, "11": {"car_position": "19", "last_time_lap": "RETIRED", "car_number": "18", "current_sector": "1"}, "22": {"car_position": "22", "last_time_lap": "1:46.244", "car_number": "22", "current_sector": "1"}, "3": {"car_position": "10", "last_time_lap": "1:41.903", "car_number": "7", "current_sector": "1"}, "12": {"car_position": "15", "last_time_lap": "1:42.051", "car_number": "6", "current_sector": "1"}, "23": {"car_position": "21", "last_time_lap": "1:48.336", "car_number": "23", "current_sector": "1"}, "4": {"car_position": "4", "last_time_lap": "1:41.640", "car_number": "2", "current_sector": "1"}, "13": {"car_position": "6", "last_time_lap": "1:41.607", "car_number": "19", "current_sector": "1"}, "24": {"car_position": "18", "last_time_lap": "1:45.622", "car_number": "20", "current_sector": "1"}, "5": {"car_position": "11", "last_time_lap": "1:43.108", "car_number": "1", "current_sector": "1"}, "6": {"car_position": "21", "last_time_lap": "", "car_number": "10", "current_sector": "1"}, "7": {"car_position": "13", "last_time_lap": "1:42.465", "car_number": "8", "current_sector": "1"}, "8": {"car_position": "1", "last_time_lap": "1:30.118", "car_number": "5", "current_sector": "1"}, "14": {"car_position": "7", "last_time_lap": "1:43.715", "car_number": "11", "current_sector": "1"}, "15": {"car_position": "12", "last_time_lap": "1:43.522", "car_number": "16", "current_sector": "1"}, "16": {"car_position": "9", "last_time_lap": "1:42.219", "car_number": "12", "current_sector": "1"}, "17": {"car_position": "", "last_time_lap": "RETIRED", "car_number": "14", "current_sector": "1"}, "18": {"car_position": "8", "last_time_lap": "1:42.190", "car_number": "17", "current_sector": "1"}, "19": {"car_position": "16", "last_time_lap": "1:43.688", "car_number": "21", "current_sector": "1"}};
+                var data={"1": {"car_position": "4", "last_time_lap": "1:42.603", "car_number": "1", "current_sector": "2"},
+                          "9": {"car_position": "10", "last_time_lap": "1:42.603", "car_number": "11", "current_sector": "2"}, 
+                          "10": {"car_position": "14", "last_time_lap": "1:41.054", "car_number": "13", "current_sector": "2"}, 
+                          "2": {"car_position": "5", "last_time_lap": "1:44.216", "car_number": "3", "current_sector": "2"}, 
+                          "11": {"car_position": "1", "last_time_lap": "1:43.216", "car_number": "14", "current_sector": "2"}, 
+                          "3": {"car_position": "22", "last_time_lap": "1:41.216", "car_number": "4", "current_sector": "2"}, 
+                          "12": {"car_position": "19", "last_time_lap": "1:44.016", "car_number": "17", "current_sector": "2"}, 
+                          "4": {"car_position": "3", "last_time_lap": "1:40.216", "car_number": "6", "current_sector": "2"}, 
+                          "13": {"car_position": "13", "last_time_lap": "1:44.116", "car_number": "19", "current_sector": "2"}, 
+                          "5": {"car_position": "7", "last_time_lap": "1:45.216", "car_number": "7", "current_sector": "2"}, 
+                          "6": {"car_position": "18", "last_time_lap": "1:46.316", "car_number": "8", "current_sector": "2"}, 
+                          "7": {"car_position": "20", "last_time_lap": "1:43.234", "car_number": "9", "current_sector": "2"}, 
+                          "8": {"car_position": "21", "last_time_lap": "1:47.016", "car_number": "10", "current_sector": "2"}, 
+                          "14": {"car_position": "11", "last_time_lap": "1:48.216", "car_number": "20", "current_sector": "2"}, 
+                          "15": {"car_position": "16", "last_time_lap": "1:43.316", "car_number": "21", "current_sector": "2"}, 
+                          "16": {"car_position": "8", "last_time_lap": "1:42.226", "car_number": "22", "current_sector": "2"}, 
+                          "17": {"car_position": "6", "last_time_lap": "1:41.116", "car_number": "25", "current_sector": "2"}, 
+                          "18": {"car_position": "9", "last_time_lap": "1:40.206", "car_number": "26", "current_sector": "2"}, 
+                          "19": {"car_position": "12", "last_time_lap": "1:39.053", "car_number": "27", "current_sector": "2"}, 
+                          "20": {"car_position": "2", "last_time_lap": "1:49.265", "car_number": "44", "current_sector": "2"}, 
+                          "21": {"car_position": "15", "last_time_lap": "1:39.226", "car_number": "77", "current_sector": "2"}, 
+                          "22": {"car_position": "17", "last_time_lap": "1:43.218", "car_number": "99", "current_sector": "2"}};
                 
                 var drivers_data = [];
                 for(var key in data) {
                     var car_position = data[key].car_position;
-                    var car_number = data[key].car_number-1;
+                    var car_number = data[key].car_number;
                     var current_sector = data[key].current_sector-1;
                     var last_time_lap = data[key].last_time_lap;
                     var car_gap = data[key].car_interval;
@@ -113,8 +133,8 @@
                             car.setLapTime(lap_seconds);
                         }
                     if(is_demo){
-                        var startPos = cars.length-car_position;
-                        car.posCurrent=race.circuit[startPos];
+                        var startPos = cars_len-car_position;
+                        car.posCurrent=[0,0];
                         car.track=startPos+1;
                     } else {
                         car.setSector(current_sector);
@@ -207,18 +227,16 @@
                     document.getElementById("map_canvas").addEventListener("touchmove", thisTouchMove, true);
                 }
                 renderCircuit();
-                for(var i=0; i<=22; i++){
-                    if(i!=12){
-                        cars[i] = new Car(i);
-                    }
+                
+                for(car_number in drivers){
+                    cars[car_number] = new Car(car_number);
                 }
+                cars_len = Object.keys(cars).length;
                 
                 updateCarsDemoRace();
                 timerAnimation = setInterval(function() {
-                    for(var i=0; i<=22; i++){
-                        if(i!=12){
-                            cars[i].move();
-                        }
+                    for(i in cars){
+                        cars[i].move();
                     }
                 }, delay);
                 //clearInterval( timerAnimation );
@@ -237,10 +255,8 @@
                     targetCar = i;
                     map.setZoom(targetZoom);
                     for(var j=0; j<=22; j++){
-                        if(j!=12){
-                            cars[j].marker.setZIndex(0);
-                            cars[j].marker.styleIcon.set('color', '#00ff00');
-                        }
+                        cars[j].marker.setZIndex(0);
+                        cars[j].marker.styleIcon.set('color', '#00ff00');
                     }
                     cars[i].marker.setZIndex(google.maps.Marker.MAX_ZINDEX + 1);
                     cars[i].marker.styleIcon.set('color', '#ffff00');
@@ -382,7 +398,7 @@
                 <div  id="status"><h3>DEMO Race</h3></div>
                 <div id="countdown">
                     <div  id="info"><h3>Next Race: </h3></div>
-                    <div  id="country"><h3>India: New Delhi</h3></div>
+                    <div  id="country"><h3>Singapore: Marina Bay Street Circuit&nbsp;</h3></div>
                     <div  id="type"><h3>Race</h3></div>
                     <h3 id="time" class="time"></h3>
                 </div>

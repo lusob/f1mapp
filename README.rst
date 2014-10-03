@@ -14,7 +14,8 @@ using jquerymobile framework.
 How it works:
 ============
 
-- The client side (frontend floder):
+
+- Frontend:
 
 It uses a Django app for the web page and the static race data (circuit, laps, 
 driver names) is put into the html using the django template system.
@@ -26,7 +27,7 @@ live timing data from server (every five seconds) and the interface will be
 updated using this data.
 
 
-- The server side (backend folder):
+- Backend:
 
 There are two programs to run the backend (see readme.txt in backend folder):
 

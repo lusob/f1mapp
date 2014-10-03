@@ -14,13 +14,13 @@ using jquerymobile framework.
 How it works:
 ============
 
-The client side (Already uploaded to github):
+The client side (frontend floder):
 Until the race start date a countdown and a demo race is showed.
 When the countdown finishes it will connect to server (using ajax) to get the
 live timing data from server (every five seconds) and the interface will be
 updated using this data.
 
-The server side (Not in github yet):
+The server side (backend folder):
 It uses a Django app for the web page and the static race data (circuit, laps, driver names) is put into the html using the django template system.
 For the dynamic data (live timing) I have modified the source of a C program
 for the linux terminal called live-f1 to generate a json with the data that the
